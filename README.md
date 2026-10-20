@@ -59,7 +59,7 @@ The test suite checks transaction operations, validation, searching, filtering, 
 
 ## Data Persistence
 
-Transactions are stored in `transactions.json`. The application loads saved data when it starts and saves transaction changes through the JSON repository.
+Transactions are stored in transactions.json. The application loads saved data when it starts and saves transaction changes through the JSON repository.
 
 ## Learning Outcomes
 
