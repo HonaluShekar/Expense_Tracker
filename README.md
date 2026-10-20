@@ -23,18 +23,18 @@ The C# Expense Tracker is a console-based application built using C# and .NET 10
 - C#
 - .NET 10
 - LINQ
-- JSON serialization using `System.Text.Json`
+- JSON serialization using System.Text.Json
 - xUnit for unit testing
 - Visual Studio Code
 
 ## Project Structure
 
-- `Models` — Transaction model and enums.
-- `Services` — Transaction operations, validation, filtering, and reports.
-- `Persistence` — JSON data storage and retrieval.
-- `Tests` — Automated unit tests.
-- `Program.cs` — Console menu and application entry point.
-- `transactions.json` — Transaction data storage.
+- "Models" — Transaction model and enums.
+- "Services" — Transaction operations, validation, filtering, and reports.
+- "Persistence" — JSON data storage and retrieval.
+- "Tests" — Automated unit tests.
+- "Program.cs" — Console menu and application entry point.
+- "transactions.json" — Transaction data storage.
 
 ## How to Run the Application
 
@@ -43,17 +43,17 @@ The C# Expense Tracker is a console-based application built using C# and .NET 10
 3. Open a terminal in the project root.
 4. Execute:
 
-```powershell
+powershell
 dotnet run
-```
+
 
 ## How to Run Tests
 
 Run the following command from the project root:
 
-```powershell
+powershell
 dotnet test Tests/ExpenseTracker.Tests.csproj
-```
+
 
 The test suite checks transaction operations, validation, searching, filtering, reports, and JSON persistence.
 
