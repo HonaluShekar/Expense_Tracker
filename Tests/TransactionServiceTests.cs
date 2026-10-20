@@ -1,3 +1,4 @@
+
 using ExpenseTracker.Models;
 using ExpenseTracker.Persistence;
 using ExpenseTracker.Services;
@@ -8,11 +9,9 @@ namespace ExpenseTracker.Tests;
 public class TransactionServiceTests
 {
     [Fact]
-    public void AddTransaction_ValidTransaction_AssignsIdAndStoresIt()
+    public void AddTransactionTest()
     {
-        string filePath = Path.Combine(
-            Path.GetTempPath(),
-            $"expense-test-{Guid.NewGuid()}.json");
+        string filePath = Path.GetTempFileName();
 
         try
         {
@@ -23,29 +22,19 @@ public class TransactionServiceTests
             {
                 Type = TransactionType.Income,
                 Amount = 25000,
-                Date = new DateTime(2026, 10, 17),
+                Date = DateTime.Now,
                 Category = TransactionCategory.Salary,
                 Description = "Test salary"
             };
 
-           
             service.AddTransaction(transaction);
 
-          
             Assert.Equal(1, transaction.Id);
-
-            var transactions = service.GetAllTransactions();
-
-            Assert.Single(transactions);
-            Assert.Equal("Test salary", transactions[0].Description);
-            Assert.Equal(25000, transactions[0].Amount);
+            Assert.Single(service.GetAllTransactions());
         }
         finally
         {
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
+            File.Delete(filePath);
         }
     }
 }

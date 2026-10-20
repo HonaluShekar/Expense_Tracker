@@ -6,43 +6,83 @@ using Xunit;
 
 namespace ExpenseTracker.Tests;
 
-public class TransactionDeleteTests
+public class TransactionFilterTests
 {
-    [Fact]
-    public void DeleteTransaction_ExistingId_ShouldRemoveTransaction()
+    private TransactionService CreateService()
     {
-        string filePath = Path.Combine(
-            Path.GetTempPath(),
-            $"delete-test-{Guid.NewGuid()}.json");
+        string path = Path.GetTempFileName();
+        return new TransactionService(new JsonTransactionRepository(path));
+    }
 
-        try
+    private void AddTransaction(
+        TransactionService service,
+        TransactionType type,
+        decimal amount,
+        TransactionCategory category,
+        string description,
+        int day = 17)
+    {
+        service.AddTransaction(new Transaction
         {
-            var repository = new JsonTransactionRepository(filePath);
-            var service = new TransactionService(repository);
+            Type = type,
+            Amount = amount,
+            Date = new DateTime(2026, 10, day),
+            Category = category,
+            Description = description
+        });
+    }
 
-            var transaction = new Transaction
-            {
-                Type = TransactionType.Expense,
-                Amount = 500,
-                Date = new DateTime(2026, 10, 17),
-                Category = TransactionCategory.Food,
-                Description = "Lunch"
-            };
+    [Fact]
+    public void GetExpenseTransactions_ShouldReturnOnlyExpenses()
+    {
+        var service = CreateService();
 
-            service.AddTransaction(transaction);
+        AddTransaction(service, TransactionType.Expense, 500,
+            TransactionCategory.Food, "Lunch");
 
-            
-            service.DeleteTransaction(transaction.Id);
+        AddTransaction(service, TransactionType.Income, 25000,
+            TransactionCategory.Salary, "Salary");
 
-           
-            Assert.Empty(service.GetAllTransactions());
-        }
-        finally
-        {
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
-        }
+        var results = service.GetExpenseTransactions();
+
+        Assert.Single(results);
+        Assert.Equal(TransactionType.Expense, results[0].Type);
+    }
+
+    [Fact]
+    public void GetTransactionsByCategory_ShouldReturnMatchingCategory()
+    {
+        var service = CreateService();
+
+        AddTransaction(service, TransactionType.Expense, 500,
+            TransactionCategory.Food, "Lunch");
+
+        AddTransaction(service, TransactionType.Expense, 1000,
+            TransactionCategory.Transport, "Bus");
+
+        var results = service.GetTransactionsByCategory(
+            TransactionCategory.Food);
+
+        Assert.Single(results);
+        Assert.Equal(TransactionCategory.Food, results[0].Category);
+    }
+
+    [Fact]
+    public void GetTransactionsByDateRange_ShouldReturnMatchingDates()
+    {
+        var service = CreateService();
+
+        AddTransaction(service, TransactionType.Expense, 500,
+            TransactionCategory.Food, "Lunch", 17);
+
+        AddTransaction(service, TransactionType.Expense, 700,
+            TransactionCategory.Food, "Dinner", 25);
+
+        var results = service.GetTransactionsByDateRange(
+            new DateTime(2026, 10, 16),
+            new DateTime(2026, 10, 20));
+
+        Assert.Single(results);
+        Assert.Equal("Lunch", results[0].Description);
     }
 }

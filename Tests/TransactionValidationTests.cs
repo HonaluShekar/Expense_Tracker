@@ -1,3 +1,4 @@
+
 using ExpenseTracker.Models;
 using ExpenseTracker.Persistence;
 using ExpenseTracker.Services;
@@ -9,124 +10,88 @@ public class TransactionValidationTests
 {
     private TransactionService CreateService()
     {
-        string filePath = Path.Combine(
-            Path.GetTempPath(),
-            $"validation-test-{Guid.NewGuid()}.json");
-
-        var repository = new JsonTransactionRepository(filePath);
-
-        return new TransactionService(repository);
+        string filePath = Path.GetTempFileName();
+        return new TransactionService(new JsonTransactionRepository(filePath));
     }
 
     [Fact]
-    public void AddTransaction_ZeroAmount_ShouldThrowException()
+    public void AddTransaction_ZeroAmount()
     {
         var service = CreateService();
-
-        var transaction = new Transaction
-        {
-            Type = TransactionType.Expense,
-            Amount = 0,
-            Date = new DateTime(2026, 10, 17),
-            Category = TransactionCategory.Food,
-            Description = "Test food"
-        };
+        var transaction = CreateTransaction(amount: 0);
 
         var exception = Assert.Throws<ArgumentException>(
             () => service.AddTransaction(transaction));
 
-        Assert.Equal(
-            "Amount must be greater than zero.",
-            exception.Message);
+        Assert.Equal("Amount must be greater than zero.", exception.Message);
     }
 
     [Fact]
-    public void AddTransaction_NegativeAmount_ShouldThrowException()
+    public void AddTransaction_NegativeAmount()
     {
         var service = CreateService();
-
-        var transaction = new Transaction
-        {
-            Type = TransactionType.Expense,
-            Amount = -500,
-            Date = new DateTime(2026, 10, 17),
-            Category = TransactionCategory.Food,
-            Description = "Test food"
-        };
+        var transaction = CreateTransaction(amount: -500);
 
         Assert.Throws<ArgumentException>(
             () => service.AddTransaction(transaction));
     }
 
     [Fact]
-    public void AddTransaction_InvalidCategory_ShouldThrowException()
+    public void AddTransaction_InvalidCategory()
     {
         var service = CreateService();
-
-        var transaction = new Transaction
-        {
-            Type = TransactionType.Income,
-            Amount = 1000,
-            Date = new DateTime(2026, 10, 17),
-            Category = TransactionCategory.Food,
-            Description = "Invalid income"
-        };
+        var transaction = CreateTransaction(
+            type: TransactionType.Income,
+            category: TransactionCategory.Food);
 
         Assert.Throws<ArgumentException>(
             () => service.AddTransaction(transaction));
     }
 
     [Fact]
-    public void AddTransaction_InvalidDate_ShouldThrowException()
+    public void AddTransaction_InvalidDate()
     {
         var service = CreateService();
-
-        var transaction = new Transaction
-        {
-            Type = TransactionType.Expense,
-            Amount = 500,
-            Date = DateTime.MinValue,
-            Category = TransactionCategory.Food,
-            Description = "Test food"
-        };
+        var transaction = CreateTransaction(date: DateTime.MinValue);
 
         Assert.Throws<ArgumentException>(
             () => service.AddTransaction(transaction));
     }
 
     [Fact]
-    public void AddTransaction_EmptyDescription_ShouldThrowException()
+    public void AddTransaction_EmptyDescription()
     {
         var service = CreateService();
-
-        var transaction = new Transaction
-        {
-            Type = TransactionType.Expense,
-            Amount = 500,
-            Date = new DateTime(2026, 10, 17),
-            Category = TransactionCategory.Food,
-            Description = ""
-        };
+        var transaction = CreateTransaction(description: "");
 
         Assert.Throws<ArgumentException>(
             () => service.AddTransaction(transaction));
     }
 
     [Fact]
-    public void AddTransaction_WhitespaceDescription_ShouldThrowException()
+    public void AddTransaction_WhitespaceDescription()
     {
         var service = CreateService();
-
-        var transaction = new Transaction
-        {
-            Type = TransactionType.Expense,
-            Amount = 500,
-            Date = new DateTime(2026, 10, 17),
-            Category = TransactionCategory.Food,
-            Description = "   "
-        };
+        var transaction = CreateTransaction(description: "   ");
 
         Assert.Throws<ArgumentException>(
             () => service.AddTransaction(transaction));
+    }
+
+    private Transaction CreateTransaction(
+        decimal amount = 500,
+        TransactionType type = TransactionType.Expense,
+        TransactionCategory category = TransactionCategory.Food,
+        DateTime? date = null,
+        string description = "Test food")
+    {
+        return new Transaction
+        {
+            Type = type,
+            Amount = amount,
+            Date = date ?? new DateTime(2026, 10, 17),
+            Category = category,
+            Description = description
+        };
     }
 }

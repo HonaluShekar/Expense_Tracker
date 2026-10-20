@@ -10,15 +10,14 @@ public class JsonTransactionRepositoryTests
     [Fact]
     public void SaveAndLoadTransactions_ShouldPreserveData()
     {
-        string filePath = Path.Combine(
-            Path.GetTempPath(),
-            $"json-test-{Guid.NewGuid()}.json");
+        string path = Path.Combine(Path.GetTempPath(),
+            $"{Guid.NewGuid()}.json");
 
         try
         {
-            var repository = new JsonTransactionRepository(filePath);
+            var repository = new JsonTransactionRepository(path);
 
-            var originalTransactions = new List<Transaction>
+            var transactions = new List<Transaction>
             {
                 new Transaction
                 {
@@ -31,34 +30,28 @@ public class JsonTransactionRepositoryTests
                 }
             };
 
-          
-            repository.SaveTransactions(originalTransactions);
-            var loadedTransactions = repository.LoadTransactions();
+            repository.SaveTransactions(transactions);
+            var loaded = repository.LoadTransactions();
 
-           
-            Assert.Single(loadedTransactions);
-            Assert.Equal(1, loadedTransactions[0].Id);
-            Assert.Equal(25000, loadedTransactions[0].Amount);
-            Assert.Equal("Salary", loadedTransactions[0].Description);
+            Assert.Single(loaded);
+            Assert.Equal(1, loaded[0].Id);
+            Assert.Equal(25000, loaded[0].Amount);
+            Assert.Equal("Salary", loaded[0].Description);
         }
         finally
         {
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
+            if (File.Exists(path))
+                File.Delete(path);
         }
     }
 
     [Fact]
     public void LoadTransactions_MissingFile_ShouldReturnEmptyList()
     {
-        string filePath = Path.Combine(
-            Path.GetTempPath(),
-            $"missing-test-{Guid.NewGuid()}.json");
+        string path = Path.Combine(Path.GetTempPath(),
+            $"{Guid.NewGuid()}.json");
 
-        var repository = new JsonTransactionRepository(filePath);
-
+        var repository = new JsonTransactionRepository(path);
         var transactions = repository.LoadTransactions();
 
         Assert.Empty(transactions);
